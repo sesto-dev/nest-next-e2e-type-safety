@@ -1,0 +1,116 @@
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "1m"
+    max-file: "1"
+    tag: "{{.Name}}"
+
+x-common-labels: &default-labels
+  logging: "promtail"
+  logging_jobname: "containerlogs"
+  stackname: "docker-monitoring-stack-gpnc"
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres-nn-openapi-template
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - default
+    labels:
+      <<: *default-labels
+    logging: *default-logging
+
+  next:
+    build:
+      context: ./next
+      dockerfile: Dockerfile
+    container_name: next-nn-openapi-template
+    restart: always
+    environment:
+      - NODE_ENV=production
+    env_file:
+      - .env
+    labels:
+      <<: *default-labels
+      traefik.enable: true
+      traefik.docker.network: traefik-public
+
+      traefik.http.routers.frontend-nn-openapi-template-client-http.rule: Host(`app.${ROOT_DOMAIN}`)
+      traefik.http.routers.frontend-nn-openapi-template-client-http.entrypoints: http
+      traefik.http.routers.frontend-nn-openapi-template-client-http.middlewares: https-redirect
+      traefik.http.routers.frontend-nn-openapi-template-client-http.service: frontend-nn-openapi-template-client-service
+
+      traefik.http.routers.frontend-nn-openapi-template-client-https.rule: Host(`app.${ROOT_DOMAIN}`)
+      traefik.http.routers.frontend-nn-openapi-template-client-https.entrypoints: https
+      traefik.http.routers.frontend-nn-openapi-template-client-https.tls: true
+      traefik.http.routers.frontend-nn-openapi-template-client-https.tls.certresolver: le
+      traefik.http.routers.frontend-nn-openapi-template-client-https.service: frontend-nn-openapi-template-client-service
+
+      traefik.http.services.frontend-nn-openapi-template-client-service.loadbalancer.server.port: 3000
+      traefik.http.middlewares.frontend-nn-openapi-template-client-headers.headers.customrequestheaders.X-Forwarded-Proto: https
+    logging: *default-logging
+    networks:
+      - traefik-public
+      - default
+    depends_on:
+      - postgres
+
+  nest:
+    build:
+      context: nest
+      dockerfile: Dockerfile
+    container_name: nest-nn-openapi-template
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - default
+      - traefik-public
+    labels:
+      <<: *default-labels
+      traefik.enable: true
+      traefik.docker.network: traefik-public
+
+      traefik.http.routers.nest-nn-openapi-template-http.rule: Host(`api.${ROOT_DOMAIN}`)
+      traefik.http.routers.nest-nn-openapi-template-http.entrypoints: http
+      traefik.http.routers.nest-nn-openapi-template-http.middlewares: https-redirect
+      traefik.http.routers.nest-nn-openapi-template-http.service: nest-nn-openapi-template-service
+
+      traefik.http.routers.nest-nn-openapi-template-https.rule: Host(`api.${ROOT_DOMAIN}`)
+      traefik.http.routers.nest-nn-openapi-template-https.entrypoints: https
+      traefik.http.routers.nest-nn-openapi-template-https.tls: true
+      traefik.http.routers.nest-nn-openapi-template-https.tls.certresolver: le
+      traefik.http.routers.nest-nn-openapi-template-https.service: nest-nn-openapi-template-service
+
+      traefik.http.services.nest-nn-openapi-template-service.loadbalancer.server.port: 3000
+    logging: *default-logging
+
+  redis:
+    image: redis:latest
+    container_name: redis-nn-openapi-template
+    cpus: 0.5
+    mem_limit: 512m
+    networks:
+      - default
+    labels:
+      <<: *default-labels
+    logging: *default-logging
+
+volumes:
+  grafana-data:
+  prometheus-data:
+  postgres-data:
+
+networks:
+  default:
+    driver: bridge
+  traefik-public:
+    external: true
