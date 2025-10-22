@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator zod {
+  provider               = "prisma-zod-generator"
+  output                 = "../src/prisma/generated"
+  useMultipleFiles       = true
+  createInputTypes       = true
+  updateInputTypes       = true
+  withRelations          = true
+  relationModel          = true
+  prismaJsonNullability  = true
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                      Int       @id @default(autoincrement())
+  email                   String    @unique
+  phone                   String?   @unique
+  avatar                  String?
+  name                    String?
+  birthday                DateTime?
+  otp                     String?
+  email_unsubscribe_token String    @unique @default(uuid())
+  referral_code           String    @unique @default(uuid()) @db.VarChar(50)
+  password                String
+  is_banned               Boolean   @default(false)
+  is_email_verified       Boolean   @default(false)
+  is_phone_verified       Boolean   @default(false)
+  is_email_subscribed     Boolean   @default(false)
+  is_phone_subscribed     Boolean   @default(false)
+  is_staff                Boolean   @default(false)
+  is_active               Boolean   @default(true)
+  created_at              DateTime  @default(now())
+  updated_at              DateTime  @updatedAt
+
+  todos                   Todo[]
+  groups                  UserGroup[]
+}
+
+model Todo {
+  id          String   @id @default(uuid())
+  owner_id    Int
+  title       String
+  description String   @default("")
+  is_complete Boolean  @default(false)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  owner User @relation(fields: [owner_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([owner_id])
+  @@map("dashboard_todo")
+}
+
+model Group {
+  id     Int          @id @default(autoincrement())
+  name   String       @unique
+  users  UserGroup[]
+}
+
+model UserGroup {
+  user_id     Int
+  group_id    Int
+  assigned_at DateTime @default(now())
+
+  user  User  @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  group Group @relation(fields: [group_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@id([user_id, group_id])
+  @@index([group_id])
+  @@map("access_user_groups")
+}
