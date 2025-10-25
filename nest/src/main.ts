@@ -46,7 +46,7 @@ async function bootstrap() {
     res.type('application/json').send(document)
   })
 
-  const port = configService.get<number>('PORT', 4000)
+  const port = configService.get<number>('PORT', 3000)
   await app.listen(port)
   logger.log(`HTTP server running on port ${port}`)
 }
