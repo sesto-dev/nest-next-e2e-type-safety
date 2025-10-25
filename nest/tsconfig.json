@@ -6,6 +6,7 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "target": "es2021",
     "sourceMap": true,
     "outDir": "./dist",
@@ -14,18 +15,9 @@
     "strict": true,
     "skipLibCheck": true,
     "paths": {
-      "~/*": [
-        "src/*"
-      ]
+      "~/*": ["src/*"]
     }
   },
-  "include": [
-    "src/**/*.ts",
-    "scripts/**/*.ts",
-    "prisma/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist"
-  ]
+  "include": ["src/**/*.ts", "scripts/**/*.ts", "prisma/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
 }

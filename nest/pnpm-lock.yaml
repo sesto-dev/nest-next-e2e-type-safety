@@ -73,7 +73,7 @@ importers:
         specifier: ^5.0.2
         version: 5.0.2
       '@types/cookie-parser':
-        specifier: ^1.4.6
+        specifier: ^1.4.7
         version: 1.4.9(@types/express@4.17.23)
       '@types/express':
         specifier: ^4.17.21
