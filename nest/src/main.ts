@@ -33,8 +33,8 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, swaggerConfig)
   cleanupOpenApiDoc(document)
-  SwaggerModule.setup('swagger', app, document, {
-    jsonDocumentUrl: '/schema',
+  SwaggerModule.setup('docs', app, document, {
+    jsonDocumentUrl: '/openapi.json',
     swaggerOptions: {
       persistAuthorization: true,
     },
@@ -42,7 +42,7 @@ async function bootstrap() {
 
   // Serve JSON schema at /schema
   const httpAdapter = app.getHttpAdapter()
-  httpAdapter.get('/schema', (req, res) => {
+  httpAdapter.get('/openapi.json', (req, res) => {
     res.type('application/json').send(document)
   })
 
