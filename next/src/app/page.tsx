@@ -1,86 +1,93 @@
 // next/src/app/page.tsx
-"use client";
+'use client'
 
-import React, { useEffect, useState } from "react";
-import { Input } from "~/components/ui/input";
-import { Button } from "~/components/ui/button";
-import { apiTodosDestroy, apiTodosList, apiTodosCreate, apiTodosPartialUpdate, type Todo } from "~/client";
+import React, { useEffect, useState } from 'react'
+import { Input } from '~/components/ui/input'
+import { Button } from '~/components/ui/button'
+import {
+  apiTodosDestroy,
+  apiTodosList,
+  apiTodosCreate,
+  apiTodosPartialUpdate,
+  type ApiTodosCreateResponse,
+} from '~/client'
 
 export default function TodosPage() {
-  const [todos, setTodos] = useState<Todo[]>([]);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [todos, setTodos] = useState<ApiTodosCreateResponse[]>([])
+  const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
+  const [loading, setLoading] = useState(false)
 
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASEURL ?? "";
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASEURL ?? ''
 
   async function loadTodos() {
-    setLoading(true);
+    setLoading(true)
     try {
       const res = await apiTodosList()
-  
-      if (res.error || !res.data?.results) throw new Error("Failed to load todos");
-      setTodos(res?.data?.results);
+
+      if (res.error || !res.data?.results)
+        throw new Error('Failed to load todos')
+      setTodos(res?.data?.results)
     } catch (err) {
-      console.error(err);
+      console.error(err)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
   }
 
   useEffect(() => {
-    loadTodos();
-  }, []);
+    loadTodos()
+  }, [])
 
   async function handleCreate(e: React.FormEvent) {
-    e.preventDefault();
-    if (!title.trim()) return;
+    e.preventDefault()
+    if (!title.trim()) return
     try {
       const res = await apiTodosCreate({
         body: { title: title.trim(), description: description.trim() },
       })
-   
+
       if (res.error) {
-        throw new Error("Failed to create todo");
+        throw new Error('Failed to create todo')
       }
-      setTitle("");
-      setDescription("");
-      await loadTodos();
+      setTitle('')
+      setDescription('')
+      await loadTodos()
     } catch (err) {
-      console.error(err);
-      alert((err as Error).message || "Create failed");
+      console.error(err)
+      alert((err as Error).message || 'Create failed')
     }
   }
 
-  async function toggleComplete(todo: Todo) {
+  async function toggleComplete(todo: ApiTodosCreateResponse) {
     try {
       const res = await apiTodosPartialUpdate({
         path: { id: todo.id },
         body: {
-          is_complete: true
-        }
+          is_complete: true,
+        },
       })
-      
-      if (res.error) throw new Error("Failed to update");
-      await loadTodos();
+
+      if (res.error) throw new Error('Failed to update')
+      await loadTodos()
     } catch (err) {
-      console.error(err);
-      alert("Update failed");
+      console.error(err)
+      alert('Update failed')
     }
   }
 
-  async function handleDelete(todo: Todo) {
-    if (!confirm("Delete this todo?")) return;
+  async function handleDelete(todo: ApiTodosCreateResponse) {
+    if (!confirm('Delete this todo?')) return
     try {
       const res = await apiTodosDestroy({
         path: { id: todo.id },
       })
-    
-      if (res.error) throw new Error("Failed to delete");
-      await loadTodos();
+
+      if (res.error) throw new Error('Failed to delete')
+      await loadTodos()
     } catch (err) {
-      console.error(err);
-      alert("Delete failed");
+      console.error(err)
+      alert('Delete failed')
     }
   }
 
@@ -120,19 +127,23 @@ export default function TodosPage() {
                     checked={t.is_complete}
                     onChange={() => toggleComplete(t)}
                   />
-                  <strong className={t.is_complete ? "line-through" : ""}>
+                  <strong className={t.is_complete ? 'line-through' : ''}>
                     {t.title}
                   </strong>
                 </div>
-                {t.description && <div className="text-sm text-muted-foreground mt-1">{t.description}</div>}
+                {t.description && (
+                  <div className="text-sm text-muted-foreground mt-1">
+                    {t.description}
+                  </div>
+                )}
                 <div className="text-xs text-muted-foreground mt-2">
-                  Created {new Date(t.created_at).toLocaleString()}
+                  Created {new Date(String(t.created_at)).toLocaleString()}
                 </div>
               </div>
 
               <div className="flex flex-col items-end gap-2">
                 <Button variant="ghost" onClick={() => toggleComplete(t)}>
-                  {t.is_complete ? "Mark open" : "Complete"}
+                  {t.is_complete ? 'Mark open' : 'Complete'}
                 </Button>
                 <Button variant="destructive" onClick={() => handleDelete(t)}>
                   Delete
@@ -143,5 +154,5 @@ export default function TodosPage() {
         </ul>
       )}
     </div>
-  );
+  )
 }

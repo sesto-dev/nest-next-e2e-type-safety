@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.0",
   "paths": {
-    "/auth/register": {
+    "/api/auth/register": {
       "post": {
         "operationId": "api_auth_register_create",
         "parameters": [],
@@ -33,7 +33,7 @@
         ]
       }
     },
-    "/auth/login": {
+    "/api/auth/login": {
       "post": {
         "operationId": "api_auth_login_create",
         "parameters": [],
@@ -65,7 +65,7 @@
         ]
       }
     },
-    "/auth/logout": {
+    "/api/auth/logout": {
       "post": {
         "operationId": "api_auth_logout_create",
         "parameters": [],
@@ -85,7 +85,7 @@
         ]
       }
     },
-    "/auth/me": {
+    "/api/auth/me": {
       "get": {
         "operationId": "api_auth_me_retrieve",
         "parameters": [],
@@ -112,7 +112,7 @@
         ]
       }
     },
-    "/auth/token/refresh": {
+    "/api/auth/token/refresh": {
       "post": {
         "operationId": "api_auth_token_refresh_create",
         "parameters": [],
@@ -134,7 +134,7 @@
         ]
       }
     },
-    "/users": {
+    "/api/users": {
       "get": {
         "operationId": "api_users_list",
         "parameters": [
@@ -226,7 +226,7 @@
         ]
       }
     },
-    "/users/{id}": {
+    "/api/users/{id}": {
       "get": {
         "operationId": "api_users_retrieve",
         "parameters": [
@@ -306,7 +306,7 @@
         ]
       }
     },
-    "/todos": {
+    "/api/todos": {
       "get": {
         "operationId": "api_todos_list",
         "parameters": [
@@ -433,7 +433,7 @@
         ]
       }
     },
-    "/todos/{id}": {
+    "/api/todos/{id}": {
       "get": {
         "operationId": "api_todos_retrieve",
         "parameters": [
@@ -543,7 +543,7 @@
   },
   "info": {
     "title": "OpenAPI Schema",
-    "description": "Prisma-driven NestJS API schema",
+    "description": "Prisma-first API schema generated from NestJS + Zod",
     "version": "1.0.0",
     "contact": {}
   },
@@ -551,15 +551,15 @@
   "servers": [],
   "components": {
     "securitySchemes": {
-      "jwtAuth": {
-        "scheme": "bearer",
-        "bearerFormat": "JWT",
-        "type": "http"
-      },
       "cookie": {
         "type": "apiKey",
         "in": "cookie",
         "name": "refresh_token"
+      },
+      "jwtAuth": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
       }
     },
     "schemas": {
