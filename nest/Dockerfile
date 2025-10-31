@@ -8,14 +8,18 @@ RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 # copy lockfile & package.json first (improves caching)
 COPY package.json pnpm-lock.yaml ./
 
-# install deps (dev deps included so we can run prisma generate + build)
-RUN pnpm install --frozen-lockfile
+# show versions (debug) and install all deps including devDependencies
+RUN pnpm -v && node -v && pnpm install --prod=false
 
 # copy source
 COPY . .
 
-# build project
+# run prisma generate and build
 RUN pnpm run build
+
+# prune dev deps so the node_modules contains only production deps
+# (this will remove dev dependencies from node_modules)
+RUN pnpm prune --prod
 
 # ---------- runtime ----------
 FROM node:20-bullseye-slim AS runner
@@ -30,13 +34,12 @@ COPY package.json ./
 ENV NODE_ENV=production
 ENV PORT=3000
 
-# Ensure the node user can write to the app dir (prevents EACCES when GraphQL tries to write)
-# This runs as root during the build and sets ownership to the built-in 'node' user.
+# ensure the node user can write to the app dir
 RUN chown -R node:node /usr/src/app
 
-# switch to non-root user
 USER node
 
 EXPOSE 3000
 
+# adjust path if your build outputs a different file (dist/main.js vs dist/src/main.js)
 CMD ["node", "dist/src/main.js"]
